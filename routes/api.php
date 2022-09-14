@@ -22,9 +22,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
 
 
 Route::group(['namespace' => 'Api'], function(){
@@ -32,29 +32,31 @@ Route::group(['namespace' => 'Api'], function(){
     Route::post('/users', [AuthController::class, 'register']);
 
 
-    Route::get('/user', [UserController::class, 'show']);
-    Route::put('/user', [UserController::class, 'update']);
+    Route::get('/user', [UserController::class, 'show'])->middleware('auth');
+    Route::put('/user', [UserController::class, 'update'])->middleware('auth');
 
     Route::get('/profiles/{user:username}', [ProfileController::class, 'show']);
-    Route::post('/profiles/{user:username}/follow', [ProfileController::class, 'follow']);
-    Route::delete('/profiles/{user:username}/follow', [ProfileController::class, 'unfollow']);
+    Route::post('/profiles/{user:username}/follow', [ProfileController::class, 'follow'])->middleware('auth');
+    Route::delete('/profiles/{user:username}/follow', [ProfileController::class, 'unfollow'])->middleware('auth');
 
+
+    Route::get('/articles/feed', [FeedController::class, 'index'])->middleware('auth');
 
     Route::get('/articles', [ArticleController::class, 'index']);
     Route::get('/articles/{article:slug}', [ArticleController::class, 'show']);
-    Route::post('/articles', [ArticleController::class, 'store']);
-    Route::put('/articles/{article:slug}', [ArticleController::class, 'update']);
-    Route::delete('/articles/{article:slug}', [ArticleController::class, 'destroy']);
-
-    Route::get('/articles/feed', [FeedController::class, 'index']);
+    Route::post('/articles', [ArticleController::class, 'store'])->middleware('auth');
+    Route::put('/articles/{article:slug}', [ArticleController::class, 'update'])->middleware('auth');
+    Route::delete('/articles/{article:slug}', [ArticleController::class, 'destroy'])->middleware('auth');
 
 
-    Route::post('/articles/{article:slug}/comments', [CommentController::class, 'store']);
+
+
+    Route::post('/articles/{article:slug}/comments', [CommentController::class, 'store'])->middleware('auth');
     Route::get('/articles/{article:slug}/comments', [CommentController::class, 'index']);
-    Route::delete('/articles/{article:slug}/comments/{comment:id}', [CommentController::class, 'destroy']);
+    Route::delete('/articles/{article:slug}/comments/{comment:id}', [CommentController::class, 'destroy'])->middleware('auth');
 
-    Route::post('/articles/{article:slug}/favorite', [FavoriteController::class, 'add']);
-    Route::delete('/articles/{article:slug}/favorite', [FavoriteController::class, 'remove']);
+    Route::post('/articles/{article:slug}/favorite', [FavoriteController::class, 'add'])->middleware('auth');
+    Route::delete('/articles/{article:slug}/favorite', [FavoriteController::class, 'remove'])->middleware('auth');
 
     Route::get('/tags', [TagController::class, 'index']);
 

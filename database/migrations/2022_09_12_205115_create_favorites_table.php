@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('favorites', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('article_id');
+            $table->timestamps();
 
 
             $table->primary(['user_id', 'article_id']);

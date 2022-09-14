@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Auth;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,14 +19,10 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'username',
-    ];
+
 
     protected $guarded = [];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -47,15 +44,59 @@ class User extends Authenticatable implements JWTSubject
     ];
 
 
+
+    // ACCESSORS DEFINED HERE
+
+    public function getJsonUserAttribute()
+    {
+        $token = Auth::login($this);
+        return response()->json([
+            'user' => [
+                'email' => $this->email,
+                'token' => $token,
+                'username' => $this->username,
+                'bio' => $this->bio,
+                'image' => $this->image,
+            ]
+        ]);
+    }
+
+
     public function getProfileAttribute()
     {
-        //TO BE IMPLEMENTED
         return [
-            'username' => $this->username,
-            'bio' => $this->bio,
-            'image' => $this->image,
-            'following' => 'TO BE IMPLEMENTED',
+            'profile' => [
+                'username' => $this->username,
+                'bio' => $this->bio,
+                'image' => $this->image,
+                'following' => $this->followed_by_current_user,
+
+            ]
         ];
+    }
+
+    public function getFavoriteArticlesIdsAttribute()
+    {
+        return Favorite::where('user_id', '=', $this->id)->pluck('article_id')->toArray();
+    }
+
+    public function getFavoriteArticlesAttribute()
+    {
+        return Article::whereIn('id', $this->favorite_articles_ids)->get();
+    }
+
+    public function getFavoriteArticlesCountAttribute()
+    {
+        return Favorite::where('user_id', '=', $this->id)->count();
+    }
+
+    public function getFollowedByCurrentUserAttribute()
+    {
+        if (Follow::where('follower_id', auth()?->user()->id)->where('followed_id', $this->id)->count() > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getJWTIdentifier()
@@ -65,7 +106,8 @@ class User extends Authenticatable implements JWTSubject
 
     public function getJWTCustomClaims()
     {
-        return[];
+        return [];
     }
+
 
 }

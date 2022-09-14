@@ -49,43 +49,28 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        return response()->json([
-            'status' => 'success',
-            'user' => $user,
-            'authorisation' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]
-        ]);
 
+        return $user->json_user;
     }
 
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required',
             'email' => 'required|string|email|max:255|unique:users',
+            'username' => 'required',
             'password' => 'required|string|min:6',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'username' => $request->username,
             'email' => $request->email,
+            'username' => $request->username,
             'password' => Hash::make($request->password),
+            'name' => $request->name,
+            'bio' => $request->bio,
+            'image' => $request->image,
         ]);
 
-        $token = Auth::login($user);
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User created successfully',
-            'user' => $user,
-            'authorisation' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]
-        ]);
+        return $user->json_user;
     }
 
     public function logout()

@@ -25,9 +25,7 @@ class ProfileController extends Controller
 
     public function unfollow(User $user)
     {
-        $follow = Follow::where('follower_id', '=', auth()->user()->id)->where('followed_id', '=', $user->id)->first();
-
-        $follow->delete();
+        $follow = Follow::where('follower_id', '=', auth()->user()->id)->where('followed_id', '=', $user->id)->delete();
 
         return $user->profile;
     }
